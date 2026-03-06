@@ -53,8 +53,8 @@ export const Header: React.FC<HeaderProps> = ({
 					onClick={onShareClick}
 					title="Share this board"
 				>
-					<Share2 size={18} />
-					<span>Share</span>
+					{/* <Share2 size={18} /> */}
+					<span>Share Board</span>
 				</button>
 			</div>
 		</header>

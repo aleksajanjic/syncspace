@@ -1,0 +1,52 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: $primary-light;
+  padding: 20px;
+
+  &__left,
+  &__right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__logo {
+    font-size: 21px;
+    font-weight: 800;
+    background: linear-gradient(90deg, $accent, $accent-light);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-right: 30px;
+  }
+
+  &__share {
+    margin-left: 30px;
+    background: $accent;
+    color: $primary;
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 10px rgba($accent, 0.3);
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 600;
+
+    &:hover {
+      background: $accent-hover;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 18px rgba($accent, 0.45);
+    }
+
+    &:active {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 18px rgba($accent, 0.45);
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+}
