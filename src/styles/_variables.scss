@@ -1,0 +1,124 @@
+// src/styles/variables.scss
+
+// ===== Primary Colors =====
+$primary: #0f172a; // Deep navy (background)
+$primary-light: #1e293b; // Lighter navy (cards, surfaces)
+$primary-lighter: #334155; // Even lighter (hover states)
+
+// ===== Accent Colors =====
+$accent: #06b6d4; // Cyan (interactive, highlights)
+$accent-hover: #0891b2; // Darker cyan (hover)
+$accent-light: #cffafe; // Light cyan (subtle accents)
+
+// ===== Status Colors =====
+$success: #10b981; // Emerald (connected, active)
+$warning: #f59e0b; // Amber (caution, throttled)
+$error: #ef4444; // Red (errors, disconnected)
+$info: #3b82f6; // Blue (info notifications)
+
+// ===== Neutral Colors =====
+$text-primary: #f1f5f9; // Light text (primary)
+$text-secondary: #cbd5e1; // Medium text (secondary)
+$text-muted: #94a3b8; // Muted text (tertiary)
+$border: #475569; // Border color
+$border-light: #334155; // Light border
+
+// ===== Canvas & Drawing =====
+$canvas-bg: #0f172a; // Canvas background
+$stroke-default: #f1f5f9; // Default stroke color
+$eraser-color: transparent;
+
+// ===== UI Elements =====
+$button-bg: $accent;
+$button-hover: $accent-hover;
+$button-text: #0f172a;
+
+$input-bg: $primary-light;
+$input-border: $border;
+$input-text: $text-primary;
+
+// ===== Shadows =====
+$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.6);
+$shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.7);
+
+// ===== Spacing =====
+$spacing-xs: 0.25rem;
+$spacing-sm: 0.5rem;
+$spacing-md: 1rem;
+$spacing-lg: 1.5rem;
+$spacing-xl: 2rem;
+$spacing-2xl: 3rem;
+
+// ===== Typography =====
+$font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+$font-size-xs: 0.75rem;
+$font-size-sm: 0.875rem;
+$font-size-base: 1rem;
+$font-size-lg: 1.125rem;
+$font-size-xl: 1.25rem;
+$font-size-2xl: 1.5rem;
+
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// ===== Border Radius =====
+$radius-sm: 0.375rem;
+$radius-md: 0.5rem;
+$radius-lg: 0.75rem;
+$radius-xl: 1rem;
+
+// ===== Transitions =====
+$transition-fast: 150ms ease-in-out;
+$transition-base: 250ms ease-in-out;
+$transition-slow: 350ms ease-in-out;
+
+// ===== Z-index =====
+$z-dropdown: 1000;
+$z-modal: 1050;
+$z-tooltip: 1100;
+$z-notification: 1200;
+
+// src/styles/variables.scss
+
+// ===== Breakpoints (Mobile First) =====
+$breakpoint-xs: 320px; // Extra small phones
+$breakpoint-sm: 640px; // Small phones & large phones
+$breakpoint-md: 768px; // Tablets (portrait)
+$breakpoint-lg: 1024px; // Tablets (landscape) & small desktops
+$breakpoint-xl: 1280px; // Desktops
+$breakpoint-2xl: 1536px; // Large desktops
+
+// ===== Breakpoint Mixins (for easy use) =====
+@mixin sm {
+  @media (min-width: $breakpoint-sm) {
+    @content;
+  }
+}
+
+@mixin md {
+  @media (min-width: $breakpoint-md) {
+    @content;
+  }
+}
+
+@mixin lg {
+  @media (min-width: $breakpoint-lg) {
+    @content;
+  }
+}
+
+@mixin xl {
+  @media (min-width: $breakpoint-xl) {
+    @content;
+  }
+}
+
+@mixin xxl {
+  @media (min-width: $breakpoint-2xl) {
+    @content;
+  }
+}
