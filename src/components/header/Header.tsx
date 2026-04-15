@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Share2, WifiOff, Wifi } from "lucide-react";
 import clsx from "clsx";
 
 interface HeaderProps {
@@ -19,7 +18,6 @@ export const Header: React.FC<HeaderProps> = ({
 	latency = 0,
 	onShareClick,
 }) => {
-	const connectionStatus = isOnline ? "connected" : "disconnected";
 	const statusText = isOnline
 		? `Online • ${userCount} user${userCount !== 1 ? "s" : ""}`
 		: "Offline";
@@ -53,7 +51,6 @@ export const Header: React.FC<HeaderProps> = ({
 					onClick={onShareClick}
 					title="Share this board"
 				>
-					{/* <Share2 size={18} /> */}
 					<span>Share Board</span>
 				</button>
 			</div>

@@ -7,7 +7,7 @@ export function HeaderContainer() {
 	const [showShareModal, setShowShareModal] = useState(false);
 
 	const handleShareClick = () => {
-		console.log("share board")
+		console.log("share board");
 		setShowShareModal(true);
 		// TODO: Open share modal
 	};

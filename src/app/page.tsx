@@ -1,3 +1,5 @@
+import { MainWindow } from "@/components/mainWindow";
+
 export default function Home() {
-	return <div>main page</div>;
+	return <MainWindow />;
 }

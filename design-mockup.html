@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SyncSpace - Real-Time Collaborative Whiteboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* ===== CSS Variables (Dark Mode) ===== */
+    :root {
+      --primary: #0f172a;
+      --primary-light: #1e293b;
+      --primary-lighter: #334155;
+      
+      --accent: #06b6d4;
+      --accent-hover: #0891b2;
+      --accent-light: #cffafe;
+      
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --info: #3b82f6;
+      
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --border: #475569;
+      --border-light: #334155;
+      
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.6);
+      --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.7);
+      
+      --spacing-xs: 0.25rem;
+      --spacing-sm: 0.5rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 1.5rem;
+      --spacing-xl: 2rem;
+      
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      
+      --transition: 250ms ease-in-out;
+    }
+
+    body {
+      background-color: var(--primary);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      font-size: 1rem;
+      line-height: 1.5;
+      overflow: hidden;
+    }
+
+    /* ===== Layout Structure ===== */
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background: var(--primary);
+    }
+
+    /* ===== Header ===== */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-md) var(--spacing-lg);
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow-md);
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    .board-name {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      padding: var(--spacing-xs) var(--spacing-md);
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .user-status {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      padding: var(--spacing-sm) var(--spacing-md);
+      background: rgba(16, 185, 129, 0.1);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .btn-share {
+      padding: var(--spacing-sm) var(--spacing-md);
+      background: var(--accent);
+      color: var(--primary);
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+    }
+
+    .btn-share:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(6, 182, 212, 0.4);
+    }
+
+    /* ===== Main Content Area ===== */
+    .main-content {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      gap: var(--spacing-md);
+      padding: var(--spacing-md);
+    }
+
+    /* ===== Canvas Area ===== */
+    .canvas-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+
+    .canvas {
+      flex: 1;
+      background: var(--primary);
+      cursor: crosshair;
+    }
+
+    /* ===== Toolbar ===== */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-md);
+      background: var(--primary-light);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 0 var(--spacing-md);
+      border-right: 1px solid var(--border);
+    }
+
+    .toolbar-group:last-child {
+      border-right: none;
+    }
+
+    .tool-button {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--border-light);
+      background: var(--primary);
+      color: var(--text-primary);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+      font-size: 1.25rem;
+    }
+
+    .tool-button:hover {
+      background: var(--primary-lighter);
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .tool-button.active {
+      background: var(--accent);
+      color: var(--primary);
+      border-color: var(--accent);
+    }
+
+    .color-picker {
+      display: flex;
+      gap: var(--spacing-sm);
+    }
+
+    .color-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-md);
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .color-swatch:hover {
+      transform: scale(1.1);
+      border-color: var(--accent);
+    }
+
+    .color-swatch.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(6, 182, 212, 0.5);
+    }
+
+    .stroke-width {
+      display: flex;
+      gap: var(--spacing-sm);
+      align-items: center;
+    }
+
+    .stroke-option {
+      width: 40px;
+      height: 40px;
+      background: var(--primary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .stroke-option:hover {
+      background: var(--primary-lighter);
+      border-color: var(--accent);
+    }
+
+    .stroke-option.active {
+      background: var(--accent);
+      color: var(--primary);
+      border-color: var(--accent);
+    }
+
+    .stroke-line {
+      background: currentColor;
+      border-radius: 2px;
+    }
+
+    .stroke-thin { width: 12px; height: 1px; }
+    .stroke-medium { width: 14px; height: 3px; }
+    .stroke-thick { width: 16px; height: 5px; }
+
+    /* ===== Sidebar - Active Users ===== */
+    .sidebar {
+      width: 220px;
+      background: var(--primary-light);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .sidebar-header {
+      padding: var(--spacing-md);
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .users-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--spacing-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+    }
+
+    .user-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-sm) var(--spacing-md);
+      background: var(--primary);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+      transition: all var(--transition);
+    }
+
+    .user-item:hover {
+      background: var(--primary-lighter);
+      border-color: var(--accent);
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+
+    .user-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .user-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-status-text {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .user-online {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    /* ===== Performance Monitor (optional) ===== */
+    .performance-monitor {
+      position: absolute;
+      bottom: var(--spacing-md);
+      right: var(--spacing-md);
+      padding: var(--spacing-md);
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      backdrop-filter: blur(10px);
+      font-family: 'Monaco', 'Courier New', monospace;
+      line-height: 1.6;
+    }
+
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--spacing-md);
+    }
+
+    .metric-label {
+      color: var(--accent);
+    }
+
+    .metric-value {
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    /* ===== Responsive Design ===== */
+    @media (max-width: 1024px) {
+      .main-content {
+        gap: var(--spacing-sm);
+        padding: var(--spacing-sm);
+      }
+
+      .sidebar {
+        width: 180px;
+      }
+
+      .toolbar-group {
+        padding: 0 var(--spacing-sm);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: 120px;
+      }
+
+      .users-list {
+        flex-direction: row;
+        overflow-x: auto;
+      }
+
+      .toolbar {
+        flex-wrap: wrap;
+      }
+
+      .header {
+        padding: var(--spacing-sm) var(--spacing-md);
+        gap: var(--spacing-md);
+      }
+
+      .header-left {
+        gap: var(--spacing-sm);
+      }
+
+      .logo {
+        font-size: 1.25rem;
+      }
+
+      .board-name {
+        display: none;
+      }
+    }
+
+    /* ===== Scrollbar Styling ===== */
+    .users-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .users-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .users-list::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    .users-list::-webkit-scrollbar-thumb:hover {
+      background: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">SyncSpace</div>
+        <div class="board-name">Project Brainstorm</div>
+      </div>
+      <div class="header-right">
+        <div class="user-status">
+          <span class="status-dot"></span>
+          <span>Online • 3 users</span>
+        </div>
+        <button class="btn-share">Share Board</button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Canvas Area -->
+      <div class="canvas-wrapper">
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <!-- Drawing Tools -->
+          <div class="toolbar-group">
+            <button class="tool-button active" title="Pen">✏️</button>
+            <button class="tool-button" title="Eraser">🧹</button>
+            <button class="tool-button" title="Rectangle">▭</button>
+            <button class="tool-button" title="Circle">⭕</button>
+            <button class="tool-button" title="Line">∖</button>
+            <button class="tool-button" title="Arrow">➡️</button>
+          </div>
+
+          <!-- Color Picker -->
+          <div class="toolbar-group">
+            <div class="color-picker">
+              <div class="color-swatch active" style="background: #f1f5f9;" title="White"></div>
+              <div class="color-swatch" style="background: #000000;" title="Black"></div>
+              <div class="color-swatch" style="background: #ef4444;" title="Red"></div>
+              <div class="color-swatch" style="background: #f59e0b;" title="Orange"></div>
+              <div class="color-swatch" style="background: #10b981;" title="Green"></div>
+              <div class="color-swatch" style="background: #06b6d4;" title="Cyan"></div>
+              <div class="color-swatch" style="background: #3b82f6;" title="Blue"></div>
+              <div class="color-swatch" style="background: #8b5cf6;" title="Purple"></div>
+            </div>
+          </div>
+
+          <!-- Stroke Width -->
+          <div class="toolbar-group">
+            <div class="stroke-width">
+              <button class="stroke-option" title="Thin">
+                <div class="stroke-line stroke-thin"></div>
+              </button>
+              <button class="stroke-option active" title="Medium">
+                <div class="stroke-line stroke-medium"></div>
+              </button>
+              <button class="stroke-option" title="Thick">
+                <div class="stroke-line stroke-thick"></div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="toolbar-group">
+            <button class="tool-button" title="Undo">↶</button>
+            <button class="tool-button" title="Redo">↷</button>
+            <button class="tool-button" title="Clear">🗑️</button>
+          </div>
+
+          <!-- Export -->
+          <div class="toolbar-group">
+            <button class="tool-button" title="Download">⬇️</button>
+          </div>
+        </div>
+
+        <!-- Canvas -->
+        <canvas class="canvas"></canvas>
+
+        <!-- Performance Monitor -->
+        <div class="performance-monitor">
+          <div class="metric">
+            <span class="metric-label">FPS:</span>
+            <span class="metric-value">58</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Sync:</span>
+            <span class="metric-value">87ms</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Strokes:</span>
+            <span class="metric-value">1,234</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar - Active Users -->
+      <aside class="sidebar">
+        <div class="sidebar-header">Active Users</div>
+        <div class="users-list">
+          <!-- User 1 -->
+          <div class="user-item">
+            <div class="user-avatar" style="background: #ef4444;">A</div>
+            <div class="user-info">
+              <div class="user-name">Alice</div>
+              <div class="user-status-text">Drawing...</div>
+            </div>
+            <div class="user-online"></div>
+          </div>
+
+          <!-- User 2 -->
+          <div class="user-item">
+            <div class="user-avatar" style="background: #3b82f6;">B</div>
+            <div class="user-info">
+              <div class="user-name">Bob</div>
+              <div class="user-status-text">Idle</div>
+            </div>
+            <div class="user-online"></div>
+          </div>
+
+          <!-- User 3 (You) -->
+          <div class="user-item">
+            <div class="user-avatar" style="background: #10b981;">Y</div>
+            <div class="user-info">
+              <div class="user-name">You</div>
+              <div class="user-status-text">Drawing...</div>
+            </div>
+            <div class="user-online"></div>
+          </div>
+
+          <!-- User 4 -->
+          <div class="user-item">
+            <div class="user-avatar" style="background: #f59e0b;">C</div>
+            <div class="user-info">
+              <div class="user-name">Charlie</div>
+              <div class="user-status-text">Idle</div>
+            </div>
+            <div class="user-online"></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    // Simple canvas drawing demo
+    const canvas = document.querySelector('.canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Set canvas size
+    function resizeCanvas() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Draw some demo strokes
+    function drawDemoStroke(x, y, color = '#06b6d4', width = 3) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + 50, y + 30);
+      ctx.stroke();
+    }
+
+    // Draw initial demo content
+    drawDemoStroke(100, 100, '#f1f5f9', 4);
+    drawDemoStroke(200, 150, '#ef4444', 3);
+    drawDemoStroke(100, 250, '#10b981', 2);
+
+    // Simple mouse drawing
+    let isDrawing = false;
+    canvas.addEventListener('mousedown', () => { isDrawing = true; });
+    canvas.addEventListener('mouseup', () => { isDrawing = false; });
+    canvas.addEventListener('mouseleave', () => { isDrawing = false; });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (!isDrawing) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      ctx.strokeStyle = '#06b6d4';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x - 5, y - 5);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    });
+
+    // Interactive toolbar
+    document.querySelectorAll('.tool-button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tool-button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    document.querySelectorAll('.color-swatch').forEach(swatch => {
+      swatch.addEventListener('click', () => {
+        document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+        swatch.classList.add('active');
+      });
+    });
+
+    document.querySelectorAll('.stroke-option').forEach(option => {
+      option.addEventListener('click', () => {
+        document.querySelectorAll('.stroke-option').forEach(o => o.classList.remove('active'));
+        option.classList.add('active');
+      });
+    });
+
+    // Share button click
+    document.querySelector('.btn-share').addEventListener('click', () => {
+      alert('Share modal would open here with board link: syncspace.app/board/abc123');
+    });
+  </script>
+</body>
+</html>
